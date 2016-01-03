@@ -1,5 +1,5 @@
-# incognito
-# WORK IN PROGRESS###################
+# Spark Anonymization Toolkit
+ WORK IN PROGRESS###################
 #TO Run
 Execute Main Object with following arguments
  spark.master, no.of.cores, worker.memory, /input/path/folder/ [hdfs/tachyon/localdfs], input.filename
