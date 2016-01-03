@@ -1,0 +1,73 @@
+echo "##############TCloseMain########################"
+echo "[0mb]"
+spark-1.5.2-bin-hadoop2.6/bin/spark-submit \
+--master spark://haisen26.ux.uis.no:7077 \
+--executor-memory 11520m \
+--class uis.cipsi.incognito.examples.TCloseMain \
+Incognito-1.0.jar \
+-1 hdfs://haisen26.ux.uis.no:9000/islr_n/ hdfs://haisen26.ux.uis.no:9000/anonymized/islr_n/m0/t islr_ori.dat islr.dat 0,9 0.8 
+
+echo "[1mb]"
+spark-1.5.2-bin-hadoop2.6/bin/spark-submit \
+--master spark://haisen26.ux.uis.no:7077 \
+--executor-memory 11520m \
+--class uis.cipsi.incognito.examples.TCloseMain \
+Incognito-1.0.jar \
+-1 hdfs://haisen26.ux.uis.no:9000/islr_n/ hdfs://haisen26.ux.uis.no:9000/anonymized/islr_n/m1/t m1/*/ islr.dat 0,9 0.8
+
+
+echo "[100mb]"
+spark-1.5.2-bin-hadoop2.6/bin/spark-submit \
+--master spark://haisen26.ux.uis.no:7077 \
+--executor-memory 11520m \
+--class uis.cipsi.incognito.examples.TCloseMain \
+Incognito-1.0.jar \
+-1 hdfs://haisen26.ux.uis.no:9000/islr_n/ hdfs://haisen26.ux.uis.no:9000/anonymized/islr_n/m100/t m100/*/ islr.dat 0,9 0.8
+
+echo "[g1]"
+spark-1.5.2-bin-hadoop2.6/bin/spark-submit \
+--master spark://haisen26.ux.uis.no:7077 \
+--executor-memory 11520m \
+--class uis.cipsi.incognito.examples.TCloseMain \
+Incognito-1.0.jar \
+-1 hdfs://haisen26.ux.uis.no:9000/islr_n/ hdfs://haisen26.ux.uis.no:9000/anonymized/islr_n/g1/t g1/*/ islr.dat 0,9 0.8
+
+echo "[g10]"
+spark-1.5.2-bin-hadoop2.6/bin/spark-submit \
+--master spark://haisen26.ux.uis.no:7077 \
+--executor-memory 11520m \
+--class uis.cipsi.incognito.examples.TCloseMain \
+Incognito-1.0.jar \
+-1 hdfs://haisen26.ux.uis.no:9000/islr_n/ hdfs://haisen26.ux.uis.no:9000/anonymized/islr_n/g10/t g10/*/ islr.dat 0,9 0.8
+
+echo "[g20]"
+spark-1.5.2-bin-hadoop2.6/bin/spark-submit \
+--master spark://haisen26.ux.uis.no:7077 \
+--executor-memory 11520m \
+--class uis.cipsi.incognito.examples.TCloseMain \
+Incognito-1.0.jar \
+-1 hdfs://haisen26.ux.uis.no:9000/islr_n/ hdfs://haisen26.ux.uis.no:9000/anonymized/islr_n/g20/t g20/*/ islr.dat 0,9 0.8
+
+echo "[g30]"
+spark-1.5.2-bin-hadoop2.6/bin/spark-submit \
+--master spark://haisen26.ux.uis.no:7077 \
+--executor-memory 11520m \
+--class uis.cipsi.incognito.examples.TCloseMain \
+Incognito-1.0.jar \
+-1 hdfs://haisen26.ux.uis.no:9000/islr_n/ hdfs://haisen26.ux.uis.no:9000/anonymized/islr_n/g30/t g30/*/ islr.dat 0,9 0.8
+
+echo "[g40]"
+spark-1.5.2-bin-hadoop2.6/bin/spark-submit \
+--master spark://haisen26.ux.uis.no:7077 \
+--executor-memory 11520m \
+--class uis.cipsi.incognito.examples.TCloseMain \
+Incognito-1.0.jar \
+-1 hdfs://haisen26.ux.uis.no:9000/islr_n/ hdfs://haisen26.ux.uis.no:9000/anonymized/islr_n/g40/t g40/*/ islr.dat 0,9 0.8
+
+echo "[g50]"
+spark-1.5.2-bin-hadoop2.6/bin/spark-submit \
+--master spark://haisen26.ux.uis.no:7077 \
+--executor-memory 11520m \
+--class uis.cipsi.incognito.examples.TCloseMain \
+Incognito-1.0.jar \
+-1 hdfs://haisen26.ux.uis.no:9000/islr_n/ hdfs://haisen26.ux.uis.no:9000/anonymized/islr_n/g50/t g50/*/ islr.dat 0,9 0.8
