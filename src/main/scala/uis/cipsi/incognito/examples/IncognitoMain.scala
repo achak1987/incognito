@@ -158,7 +158,7 @@ object IncognitoMain {
     val anonymizedData = anonymize.generalize()
 
 //    ecs.saveAsObjectFile(outFilePath + "/ecRaw")
-//    anonymizedData.saveAsTextFile("~/out.txt")
+    anonymizedData.saveAsTextFile(outFilePath + "/ecAnn/")
     
 //    anonymizedData.distinct.collect.foreach(println)
 

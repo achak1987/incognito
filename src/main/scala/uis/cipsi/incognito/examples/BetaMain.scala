@@ -152,7 +152,7 @@ object BetaMain {
     val anonymizedData = anonymize.generalize()
 
 //    ecs.saveAsObjectFile(outFilePath + "/ecRaw/")
-//    anonymizedData.saveAsTextFile(outFilePath + "/ecAnn/")
+    anonymizedData.saveAsTextFile(outFilePath + "/ecAnn/")
 
     val anonymizedDataCount = anonymizedData.map(v => (-1, 1)).combineByKey((x: Int) => x,
       (acc: Int, x: Int) => acc + x, (acc1: Int, acc2: Int) => acc1 + acc2).map(_._2).reduce(_ + _)
