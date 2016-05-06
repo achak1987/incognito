@@ -19,7 +19,7 @@ import org.apache.spark.HashPartitioner
 
 import org.apache.spark.mllib.linalg.Vector
 
-class RedistributeNew2() extends Serializable {
+class RedistributeNew2() {
 
   def start(_tupleBucketGroup: RDD[(Int, Data)], _seeds: Broadcast[Array[(Int, (Vector, Array[String]))]],
     ecKeyBukCodeSizes: Broadcast[Map[(Int, Int), Int]], rddCount: Long) //  : RDD[(Int, Int)] 

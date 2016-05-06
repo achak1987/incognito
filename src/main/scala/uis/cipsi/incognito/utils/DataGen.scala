@@ -42,18 +42,29 @@ object DataGen {
 
     val data = m1.zipWithUniqueId.map({ case (k, v) => (v.toString + "," + k) })
       .map(_.split(dataSplitChar).map(v => v.trim))
+      
+   val numPartitions = data.sparkContext.getConf.get("spark.default.parallelism").toInt   
 
-    val QIs = data.map(t => (t(saIndex).hashCode, t.filter({ var i = (-1); x => i += 1; i != saIndex })))
+    val QIs = data.map(t => (t(saIndex), t.filter({ var i = (-1); x => i += 1; i != saIndex })))
       .map({
         x =>
           val qis = x._2.map { var i = (-1); m => i += 1; if (i == pidIndex) m.hashCode() else m.toDouble }
 
           new Data(qiID = Arrays.hashCode(qis),
             qisNumeric = Vectors.dense(qis), qisCategorical = Array(""), saHash = x._1)
-      })
+      }).repartition(numPartitions)
 
-    println(count)
-
+//     val x = dat.map({t =>        
+//       val x = t.split(",")
+//       val s = x(saIndex)
+//       val o = x.filter({ var i = (-1); x => i += 1; i != saIndex && i != pidIndex }) 
+//       val out =  o.mkString(",") + "," + s.toString
+//       out
+//     })
+//     .zipWithUniqueId.map({ case (k, v) => (v.toString + "," + k) })
+//     x
+//    .saveAsTextFile("/home/antorweep/git/SparkAnonymizationToolkit/data/islr_n/o.t")
+    
     QIs.saveAsObjectFile(outFilePath)
   }
 

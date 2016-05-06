@@ -8,8 +8,9 @@ import org.apache.spark.mllib.linalg.Vector
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.Accumulable
 import uis.cipsi.incognito.rdd.BucketsAccum
+import java.util.Arrays
 
-class BetaBuckets(rddCount: Double) extends Serializable {
+class BetaBuckets(rddCount: Double) {
 
   def partition(SAs: RDD[SATuple], rddCount: Double, acCp: Accumulable[Array[SATuple], SATuple]): Unit = {
 
@@ -28,7 +29,7 @@ class BetaBuckets(rddCount: Double) extends Serializable {
         val dat = _dat._2
         //For each group, we might be able to create multiple buckets
         //We store the intermediate buckets in a group
-        var saBucket = new ArrayBuffer[Int]
+        var saBucket = new ArrayBuffer[String]
         //Freq. of the intermediate buckets
         var saBucketFreqs = 0
         //Contains all the child SA, freq, prob, uBound under the given parent
@@ -56,7 +57,7 @@ class BetaBuckets(rddCount: Double) extends Serializable {
           //If the new to be added child brings the overall probability of the bucket beyond its uBound
           if (probSum > minUpperBound) {
             //We store the intermediate overlapping buckets created for the current group
-            val tuple = SATuple(-1, saBucket.toArray, saBucketFreqs, minUpperBound)
+            val tuple = SATuple("-1", saBucket.toArray, saBucketFreqs, minUpperBound)
             acCp += tuple
 
             //We clear the tmp. intermediate bucket, to start with a new intermediate bucket for this group
@@ -70,26 +71,30 @@ class BetaBuckets(rddCount: Double) extends Serializable {
           if (probSum == 0.0) probSum += child._3
         }
         //We store the remaining buckets created for the current group
-        val tuple = SATuple(-1, saBucket.toArray,
+        val tuple = SATuple("-1", saBucket.toArray,
           saBucketFreqs, minUpperBound)
-        acCp += tuple        
-      })    
+        acCp += tuple
+      })
   }
 
   def getBuckets(SAs: RDD[SATuple]): Array[SATuple] = {
     val acCp = SAs.sparkContext.accumulable((new BucketsAccum)
-      .zero(Array(new SATuple(Short.MaxValue, Array(-1), -1, 0.0))))(new BucketsAccum)
+      .zero(Array(new SATuple(Short.MinValue.toString, Array("-1"), 0, 0.0))))(new BucketsAccum)
 
     val itrheight = 0
     //Get all the  buckets
     val phi = partition(SAs, rddCount, acCp)
-            
+
     val out = acCp.value
-    .distinct.filter(_.bucketCode != Short.MaxValue)
-    .map(v => (v.tuple, v.freq, v.uBound))
-    .zipWithIndex
-    .map({ case (k, v) => new SATuple(v.toInt, k._1, k._2, k._3) })
-  
+      .filter(_.bucketCode != Short.MinValue)
+      //Accumulators may create duplicates, here we remove the duplicate entries before returning
+      //      .groupBy( v.bucketCode + v.tuple.sorted)
+      .groupBy({v => val x = Arrays.hashCode( v.tuple.map(_.hashCode()).sorted); x})
+      .map(v => v._2.head).toArray
+      .map(v => (v.tuple, v.freq, v.uBound))
+      .zipWithIndex
+      .map({ case (k, v) => new SATuple(v.toString, k._1, k._2, k._3) })
+
     out
   }
 }

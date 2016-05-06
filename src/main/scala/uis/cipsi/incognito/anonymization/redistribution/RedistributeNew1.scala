@@ -16,7 +16,7 @@
 //import uis.cipsi.incognito.rdd.RedistributionStats
 //import uis.cipsi.incognito.informationLoss.InformationLoss
 //import scala.util.control.Breaks._
-//class RedistributeNew1() extends Serializable {
+//class RedistributeNew1() {
 //
 //  def start(_tupleBucketGroup: RDD[(Int, Data)], _seeds: Broadcast[Array[(Int, (Vector[Double], Vector[String]))]],
 //    ecKeyBukCodeSizes: Broadcast[Map[(Int, Int), Int]], rddCount: Long): RDD[(Int, Int)] = {

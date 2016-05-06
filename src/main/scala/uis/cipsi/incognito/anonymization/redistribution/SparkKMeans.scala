@@ -11,7 +11,7 @@
 // * This is an example implementation for learning how to use Spark. For more conventional use,
 // * please refer to org.apache.spark.mllib.clustering.KMeans
 // */
-//class SparkKMeans() extends Serializable {
+//class SparkKMeans() {
 //
 //  def closestPoint(p: Vector[Double], centers: Array[Vector[Double]]): Int = {
 //    var bestIndex = 0

@@ -14,15 +14,16 @@ import org.apache.spark.Accumulable
 import uis.cipsi.incognito.rdd.SATuple
 import org.apache.spark.Accumulator
 import uis.cipsi.incognito.utils.Utils
+import java.util.Arrays
 
 class TCloseBuckets(_taxonomy: Broadcast[Map[String, String]], rddCount: Double) extends Serializable {
-  val taxonomy = _taxonomy.value.map(t => (t._1.hashCode(), t._2.hashCode()))
+  val taxonomy = _taxonomy.value //.map(t => (t._1.hashCode(), t._2.hashCode()))
 
   def cet(sum: Double, min: Double, cHeight: Int, tHeight: Int): Double = {
     1.0 * cHeight / tHeight * (sum - min)
   }
 
-  def getParent(node: Int, level: Int): Int = {
+  def getParent(node: String, level: Int): String = {
     var p = taxonomy(node)
     var _l = 1
     while (_l < level) {
@@ -32,7 +33,7 @@ class TCloseBuckets(_taxonomy: Broadcast[Map[String, String]], rddCount: Double)
     p
   }
 
-  def getChilds(parent: Int, level: Int): Array[Int] = {
+  def getChilds(parent: String, level: Int): Array[String] = {
     var l = level - 1
     var _childs = taxonomy.filter(_._2 == parent).map(_._1).toArray.distinct
     while (l >= 0) {
@@ -42,21 +43,21 @@ class TCloseBuckets(_taxonomy: Broadcast[Map[String, String]], rddCount: Double)
     _childs
   }
 
-  def partition(probNode: RDD[(Int, Double)], 
-      t: Double, level: Int, height: Int, 
-      acCp: Accumulable[Array[SATuple], SATuple],
-      acRootU: Accumulator[Double]) = {
-    
+  def partition(probNode: RDD[(String, Double)],
+                t: Double, level: Int, height: Int,
+                acCp: Accumulable[Array[SATuple], SATuple],
+                acRootU: Accumulator[Double]) = {
+
     val probs = probNode
-      .map(v => ((getParent(v._1, level), getParent(v._1, level-1)), (Array(v._1), v._2)))
-      .combineByKey((x: (Array[Int], Double)) => (x._1, (x._2, x._2)),
-        (x: (Array[Int], (Double, Double)), y: (Array[Int], Double)) => {
+      .map(v => ((getParent(v._1, level), getParent(v._1, level - 1)), (Array(v._1), v._2)))
+      .combineByKey((x: (Array[String], Double)) => (x._1, (x._2, x._2)),
+        (x: (Array[String], (Double, Double)), y: (Array[String], Double)) => {
           val min = if (x._2._2 < y._2) x._2._2 else y._2
           val sum = x._2._1 + y._2
           val childKeys = x._1 ++ y._1
           (childKeys, (sum, min))
         },
-        (x: (Array[Int], (Double, Double)), y: (Array[Int], (Double, Double))) => {
+        (x: (Array[String], (Double, Double)), y: (Array[String], (Double, Double))) => {
           val min = if (x._2._2 < y._2._2) x._2._2 else y._2._2
           val sum = x._2._1 + y._2._1
           val childKeys = x._1 ++ y._1
@@ -68,35 +69,35 @@ class TCloseBuckets(_taxonomy: Broadcast[Map[String, String]], rddCount: Double)
         val sum = v._2._2._1
         val min = v._2._2._2
         val u = cet(sum, min, level, height)
-        (parent._1, (u, (childs, sum)))        
+        (parent._1, (u, (childs, sum)))
       })
       .groupByKey
-      .map({v =>
+      .map({ v =>
         val parent = v._1
         val values = v._2.toArray
         val U = values.map(_._1).sum
-        
-        if(level == height) 
+
+        if (level == height)
           acRootU += U
-        
+
         val childs = values.map(_._2._1).flatMap(f => f)
         val sum = values.map(_._2._2).sum
-        val valid = (new Utils).round(U, 2) > (new Utils).round(t, 2)
+        val valid = U >= t
         if (!valid) {
-          val tuple = new SATuple(parent, childs, (sum * rddCount).toInt, U)
+          val tuple = new SATuple(parent, childs, math.round(sum * rddCount).toInt, U)
           acCp += tuple
         }
-        childs.map(child => (valid, (child, U)))        
-      })         
-    
+        childs.map(child => (valid, (child, U)))
+      })
+
     probs.flatMap(f => f)
   }
 
   def getBuckets(SAs: RDD[SATuple], height: Int = -1, t: Double): Array[SATuple] = {
- 
+
     val acCp = SAs.sparkContext.accumulable((new BucketsAccum)
-      .zero(Array(new SATuple(-1, Array(-1), -1, 0.0))))(new BucketsAccum)
-    val acRootU = SAs.sparkContext.accumulator(0.0)  
+      .zero(Array(new SATuple(Short.MinValue.toString, Array(Short.MinValue.toString), 0, 0.0))))(new BucketsAccum)
+    val acRootU = SAs.sparkContext.accumulator(0.0)
 
     val SAsSorted = SAs.map({ dat =>
       //Gets the parent node
@@ -111,21 +112,31 @@ class TCloseBuckets(_taxonomy: Broadcast[Map[String, String]], rddCount: Double)
 
     val phi = partition(probNode, t, level, height, acCp, acRootU)
 
-    var incompletePhi = phi.filter(_._1).map(_._2).join(SAsSorted).map(v => (v._1, v._2._2.toDouble / rddCount.toDouble))
+    var incompletePhi = phi.filter(_._1).map(_._2)
+      .join(SAsSorted).map(v => (v._1, v._2._2.toDouble / rddCount.toDouble))
 
     while (!incompletePhi.isEmpty()) {
       level = level - 1
       val phi = partition(incompletePhi, t, level, height, acCp, acRootU)
-      incompletePhi = phi.filter(_._1).map(_._2).join(SAsSorted).map(v => (v._1, v._2._2.toDouble / rddCount.toDouble))    
+      incompletePhi = phi.filter(_._1).map(_._2)
+        .join(SAsSorted)
+        .map(v => (v._1, v._2._2.toDouble / rddCount.toDouble))
     }
     incompletePhi.isEmpty()
-    val U = acRootU.value
- 
-    val out = acCp.value.distinct.filter(_.bucketCode != -1)
-    
-    out
+
+    //    val U = acRootU.value
+
+    val out = acCp.value
+      .filter(_.bucketCode != Short.MinValue)
+      //Accumulators may create duplicates, here we remove the duplicate entries before returning
+      //      .groupBy(v => v.bucketCode + v.tuple.sorted)
+      .groupBy({v => val x = Arrays.hashCode( v.tuple.map(_.hashCode()).sorted); x})
+      .map(v => v._2.head).toArray
       .map(v => (v.tuple, v.freq, v.uBound))
       .zipWithIndex
-      .map({ case (k, v) => new SATuple(v.toInt, k._1, k._2, U) })
+      //      .map({ case (k, v) => new SATuple(v.toInt, k._1, k._2, U) })
+      .map({ case (k, v) => new SATuple(v.toString, k._1, k._2, k._3) })
+
+    out
   }
 }

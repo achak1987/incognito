@@ -21,6 +21,7 @@ object DataGen2 {
     val outSize = args(4).toInt
     val dataSplitChar = args(5)
     val indexes = args(6).split(",").map(_.toInt)
+    val numPartitions = args(7)
 
     val pidIndex = indexes(0)
     val saIndex = indexes(1)
@@ -29,32 +30,34 @@ object DataGen2 {
 
     val dat = sc.objectFile[Data](inFilePath)
 
-    
-
     var itr = outSize / inSize - 1
-    
-    val d = dat.map { x => val sa = x.saHash; x.qisNumeric.toArray
-    .filter({ var i = (-1); x => i += 1; i != pidIndex })
-    .mkString(",") + "," + sa }.persist(StorageLevel.MEMORY_ONLY)
-    
+
+    val d = dat.map { x =>
+      val sa = x.saHash; x.qisNumeric.toArray
+        .filter({ var i = (-1); x => i += 1; i != pidIndex })
+        .mkString(",") + "," + sa
+    }.persist(StorageLevel.MEMORY_ONLY)
+
     var m1 = d
 
-    for (i <- 0 until itr) { 
-      m1 = m1.union(d) 
-  
+    for (i <- 0 until itr) {
+      m1 = m1.union(d)
+
     }
 
     val data = m1.zipWithUniqueId.map({ case (k, v) => (v.toString + "," + k) })
       .map(_.split(dataSplitChar).map(v => v.trim))
 
-    val QIs = data.map(t => (t(saIndex).toInt, t.filter({ var i = (-1); x => i += 1; i != saIndex })))
+//    val numPartitions = data.sparkContext.getConf.get("spark.default.parallelism").toInt
+
+    val QIs = data.map(t => (t(saIndex), t.filter({ var i = (-1); x => i += 1; i != saIndex })))
       .map({
         x =>
           val qis = x._2.map { var i = (-1); m => i += 1; if (i == pidIndex) m.hashCode() else m.toDouble }
 
           new Data(qiID = Arrays.hashCode(qis),
             qisNumeric = Vectors.dense(qis), qisCategorical = Array(""), saHash = x._1)
-      })
+      }).repartition(numPartitions.toInt)
 
     QIs.saveAsObjectFile(outFilePath)
   }

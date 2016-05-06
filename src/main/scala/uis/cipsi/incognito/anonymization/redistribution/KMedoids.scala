@@ -24,7 +24,7 @@ import breeze.linalg.DenseVector
 
 class KMedoids(data: RDD[Data], _taxonomy: Broadcast[Map[String, String]],
   _categoricalQIHeights: Broadcast[Map[Int, Int]], pidIndex: Int, k: Int, rddCount: Long)
-    extends Serializable {
+   {
   def initialize(bucketsWSAs: Map[Int, Array[Int]], ecSizesIn: Array[ECS], numIterations: Int = 1, runs: Int = 1) = {
     // Cluster the data into two classes using KMeans
     val dat = data.persist(StorageLevel.MEMORY_ONLY)
@@ -218,7 +218,7 @@ class KMedoids(data: RDD[Data], _taxonomy: Broadcast[Map[String, String]],
   //  }
 }
 
-class VectorWithNorm(val vector: org.apache.spark.mllib.linalg.Vector, val norm: Double) extends Serializable {
+class VectorWithNorm(val vector: org.apache.spark.mllib.linalg.Vector, val norm: Double) {
 
   def this(vector: org.apache.spark.mllib.linalg.Vector) = this(vector, Vectors.norm(vector, 2.0))
 
@@ -228,7 +228,7 @@ class VectorWithNorm(val vector: org.apache.spark.mllib.linalg.Vector, val norm:
   def toDense: VectorWithNorm = new VectorWithNorm(Vectors.dense(vector.toArray), norm)
 }
 
-class XORShiftRandom(init: Long) extends JavaRandom(init) with Serializable {
+class XORShiftRandom(init: Long) extends JavaRandom(init) {
 
   private var seed = XORShiftRandom.hashSeed(init)
 
@@ -246,7 +246,7 @@ class XORShiftRandom(init: Long) extends JavaRandom(init) with Serializable {
     seed = XORShiftRandom.hashSeed(s)
   }
 
-  object XORShiftRandom extends Serializable {
+  object XORShiftRandom {
     /** Hash seeds to have 0/1 bits throughout. */
     def hashSeed(seed: Long): Long = {
       val bytes = ByteBuffer.allocate(java.lang.Long.SIZE).putLong(seed).array()

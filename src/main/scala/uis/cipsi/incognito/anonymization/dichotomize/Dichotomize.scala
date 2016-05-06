@@ -23,14 +23,27 @@ import uis.cipsi.incognito.rdd.ECS
 import scala.collection.mutable.ArrayBuffer
 import uis.cipsi.incognito.rdd.ECS
 import scala.util.control.Breaks
+import org.apache.spark.serializer.KryoRegistrator
+import com.esotericsoftware.kryo.Kryo
+import uis.cipsi.incognito.rdd.ECS
 
 class Dichotomize() extends Serializable {
-  
-  val mybreaks = new Breaks
-  import mybreaks.{break, breakable}
 
-  def div(x: RDD[(ECKey, (Array[Int], Array[Int], Array[Double]))], acCp: Accumulable[Array[ECS], ECS]) = {
-    val rtn = x.filter({
+  def div(_x: RDD[BucketSizes]): RDD[(Boolean, BucketSizes)] = {
+
+//    val numPartitions = _x.sparkContext.getConf.get("spark.default.parallelism").toInt
+    
+    val x = _x.map(b => (b.ecKey, b)).groupByKey()
+      .mapValues({ b =>
+        val bA = b
+        val buks = b.map(_.bucketCode).toArray
+        val sizes = b.map(_.size).toArray
+        val uBounds = b.map(_.uBound).toArray
+        (buks, sizes, uBounds)
+      })//.repartition(numPartitions)
+
+    
+    val out = x.map({
       y =>
         var valid = true
         val ecKey = y._1
@@ -62,60 +75,44 @@ class Dichotomize() extends Serializable {
         } else
           valid = false
 
-        if (!valid) {
-          val bukWSize = buks.map({ var i = (-1); v => i += 1; (v, sizes(i)) }).toMap
-          acCp += new ECS(ecKey, bukWSize)
-        }
-        valid
-    }).map({ y =>
-
-      val ecKey = y._1
-      val buks = y._2._1
-      val sizes = Vector(y._2._2)
-      val uBounds = Vector(y._2._3)
-      val nECKeyLHS = new ECKey(ecKey.level + 1, (ecKey.sideParent + ecKey.side).hashCode().toString, '0')
-      val nECKeyRHS = new ECKey(ecKey.level + 1, (ecKey.sideParent + ecKey.side).hashCode().toString, '1')
-      val lhs = sizes.map(s => math.floor(s / 2).toInt)
-      val rhs = sizes - lhs
-      val out = {
-        val l = Array((nECKeyLHS, (buks, lhs.toArray, uBounds.toArray)))
-        val r = Array((nECKeyRHS, (buks, rhs.toArray, uBounds.toArray)))
-        l ++ r
-      }
-      out
-    })
-    rtn.flatMap(f => f)
+        val out = ({
+          if (!valid) {
+            val p = buks.map({ var i = (-1); v => i += 1; new BucketSizes(ecKey, v, sizes(i), uBounds(i)) }).map(v => (valid, v))
+            p
+          } else {
+            val nECKeyLHS = new ECKey(ecKey.level + 1, (ecKey.sideParent + ecKey.side).hashCode().toString, '0')
+            val nECKeyRHS = new ECKey(ecKey.level + 1, (ecKey.sideParent + ecKey.side).hashCode().toString, '1')
+            val l = buks.map({ var i = (-1); v => i += 1; new BucketSizes(nECKeyLHS, v, lhs(i), uBounds(i)) })
+            val r = buks.map({ var i = (-1); v => i += 1; new BucketSizes(nECKeyRHS, v, rhs(i), uBounds(i)) })
+            val c = (Array(l) ++ Array(r)).flatMap(f => f)
+            val out = c.map(v => (valid, v))
+            out
+          }
+        })
+        out
+    }).flatMap(f => f)
+    out
   }
 
-  def getECSizes(bucketsSizes: RDD[BucketSizes]) = {
-    val acCp = bucketsSizes.sparkContext.accumulable((new ECsAccum)
-      .zero(Array(new ECS(new ECKey(-1, "-1", '0'), Map(-1 -> -1)))))(new ECsAccum)
+  def getECSizes(bucketsSizes: RDD[BucketSizes]): RDD[ECS] = {
 
-    val vaCp = new ArrayBuffer[ECS]
-
-    val x = bucketsSizes.map(b => (b.ecKey, b)).groupByKey()
-      .mapValues({ b =>
-        val bA = b
-        val buks = b.map(_.bucketCode).toArray
-        val sizes = b.map(_.size).toArray
-        val uBounds = b.map(_.uBound).toArray
-        (buks, sizes, uBounds)
-      }).persist(StorageLevel.MEMORY_ONLY)
-
-    val y = div(x, acCp)
-    var aIN = y
-
-    breakable {
-      while (true) {
-
-        val y = div(aIN, acCp)
-        if (y.isEmpty()) break
-        aIN = y
-        
-      }
+    var y = div(bucketsSizes)
+    var leafs = y.filter(!_._1).map(_._2)
+    
+    while (!y.isEmpty()) {
+      val nLeafs = y.filter(_._1).map(_._2).cache
+      y = div(nLeafs)
+      leafs = leafs.union(y.filter(!_._1).map(_._2))
+      nLeafs.unpersist(false)      
     }
     
+    
+    val out = leafs.map(v => (v.ecKey, (v.bucketCode, v.size)))
+                   .groupByKey
+                   .mapValues(f => (f.toMap))
+                   .map(v => new ECS(v._1, v._2))
+        
 
-    acCp.value.distinct.filter(_.ecKey.level != -1)
+    out
   }
 }

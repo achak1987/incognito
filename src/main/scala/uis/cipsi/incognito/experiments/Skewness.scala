@@ -13,11 +13,11 @@ object Skewness {
   Logger.getLogger("org").setLevel(Level.OFF)
   Logger.getLogger("akka").setLevel(Level.OFF)
 
-  def saHashToLevel(saHash: Int, taxonomy: Map[String, String], level: Int, height: Int): String = {
+  def saHashToLevel(saHash: String, taxonomy: Map[String, String], level: Int, height: Int): String = {
     var i = height
-    val taxKeyHashMap = HashMap(0 -> "")
-    taxonomy.keys.foreach({ k => taxKeyHashMap += ((k.hashCode(), k)) })
-    var parent = taxKeyHashMap(saHash)
+    //    val taxKeyHashMap = HashMap("-1" -> "")
+    //    taxonomy.keys.foreach({ k => taxKeyHashMap += ((k, k)) })
+    var parent = saHash //taxonomy(saHash)
 
     while (i > level) {
       i -= 1
@@ -31,10 +31,9 @@ object Skewness {
     //Path to the folder that contain the data, taxonomy tree and data def.
     val filePath = args(1)
     val fileName = args(2)
-    val redistributedECPath = args(3)    
-    val level = args(4).toInt
+    val redistributedECPath = args(3)
+    var level = 0 //args(4).toInt
     val saIndex = args(5).toInt
-    
 
     val dataPath = filePath + fileName
     val taxonomyPath = dataPath + ".taxonomy"
@@ -63,24 +62,47 @@ object Skewness {
 
     val ecs = sc.objectFile[(ECKey, Data)](redistributedECPath)
 
-    println("SA Probabilies in Whole Table")
+    //    println("SA Probabilies in Whole Table")
     val count = ecs.count()
-    val saPChangeTotal = ecs.map(e => (saHashToLevel(e._2.saHash, taxonomy, level, saTreeHeight), 1)).reduceByKey(_ + _).map(x => (x._1, x._2.toDouble / count)).collectAsMap
 
-    saPChangeTotal.foreach(println)
+    val ecAtLevel = ecs
+      .map(e => ((e._1, saHashToLevel(e._2.saHash, taxonomy, level, saTreeHeight)), 1))
 
-    println("SA Probabilies in ECs")
+    //    println("SA Probabilies in ECs")
     val countPerEC = ecs.countByKey()
 
-    val saPChangePerEC = ecs.map(e => ((e._1, saHashToLevel(e._2.saHash, taxonomy, level, saTreeHeight)), 1))
+    val saPChangeTotal = ecAtLevel.map(v => (v._1._2, v._2))
+      .reduceByKey(_ + _).map(x => (x._1, x._2.toDouble / count)).collectAsMap
+
+    //    ecAtLevel
+    //    .filter(v => v._1._1.level == 5 && v._1._1.sideParent == "1591764892" && v._1._1.side == '1')
+    //      .reduceByKey(_ + _)
+    //      .map(x => (x._1, x._2.toDouble, countPerEC(x._1._1), x._2.toDouble / countPerEC(x._1._1)))
+    //      .collect.foreach(println)
+    //
+    //    saPChangeTotal.foreach(println)
+    //    countPerEC.foreach(println)
+
+    //      ecs
+    //      .map(e => (saHashToLevel(e._2.saHash, taxonomy, level, saTreeHeight), 1))
+    //      .reduceByKey(_ + _).map(x => (x._1, x._2.toDouble, count))
+    //      .collect
+    //      .foreach(println)
+
+    val saPChangePerEC = ecAtLevel
       .reduceByKey(_ + _).map(x => (x._1, x._2.toDouble / countPerEC(x._1._1)))
       .map(x => (x._1._1, (x._1._2, x._2))).groupByKey
 
-    saPChangePerEC.collect.foreach(println)
+
+    //    ecs.map(e => ((e._1, saHashToLevel(e._2.saHash, taxonomy, level, saTreeHeight)), 1))
+    //      .reduceByKey(_ + _)
+    //      .map(x => (x._1, x._2.toDouble, countPerEC(x._1._1)))
+    //      .map(x => (x._1._1, (x._1._2, x._2, x._3))).groupByKey.mapValues(_.toArray.sortBy(_._2).toSeq )
+    //      .collect.foreach(println)
 
     //    println("Percentage change in probabilies of SA values appearing in their respective EC compared to their appearance in the complete dataset")
-    val percentChange = saPChangePerEC.mapValues(v => v.map(f => (f._1, math.abs(f._2 - saPChangeTotal(f._1)) / saPChangeTotal(f._1) * 100)))
-    //    percentChange.collect.foreach(println)
+    val percentChange = saPChangePerEC.mapValues(v => v.map(f => (f._1, math.abs(saPChangeTotal(f._1) - f._2) / saPChangeTotal(f._1) * 100)))
+    //        percentChange.collect.foreach(println)
 
     //    println("Avg. % change per EC")
     val avgChangePerEC = percentChange.mapValues({ v => val change = v.map(_._2); change.sum / change.size })
@@ -88,12 +110,15 @@ object Skewness {
 
     //    println("Max. % change per EC")
     val maxChangePerEC = percentChange.mapValues({ v => val change = v.map(_._2); change.max })
-    //    maxChangePerEC.collect.foreach(println)
+            maxChangePerEC.collect.foreach(println)
 
     val _avgChangeCompleteDS = avgChangePerEC.map(_._2)
     val avgChangeCompleteDS = _avgChangeCompleteDS.sum / _avgChangeCompleteDS.count
 
     val maxChangeCompleteDS = maxChangePerEC.map(_._2).max()
+
+    val x = percentChange.mapValues({ v => v.maxBy(_._2) }).sortBy(_._2._2, false).take(1).toSeq
+    println(percentChange.count)
 
     println("Avg. % change complete dataset= " + avgChangeCompleteDS)
     println("Max. % change complete dataset= " + maxChangeCompleteDS)

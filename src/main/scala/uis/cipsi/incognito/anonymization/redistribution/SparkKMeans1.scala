@@ -5,7 +5,7 @@
 //import org.apache.spark.SparkContext._
 //import org.apache.spark.rdd.RDD
 //
-//class SparkKMeans1() extends Serializable {
+//class SparkKMeans1()  {
 //
 //
 //  def closestPoint(p: Vector[Double], centers: Array[Vector[Double]]): Int = {

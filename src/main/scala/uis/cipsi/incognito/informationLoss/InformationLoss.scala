@@ -8,7 +8,7 @@ import org.apache.spark.rdd.RDD
 import uis.cipsi.incognito.rdd.Data
 import com.github.fommil.netlib.{BLAS => NetlibBLAS, F2jBLAS}
 import com.github.fommil.netlib.BLAS.{getInstance => NativeBLAS}
-class InformationLoss extends Serializable {
+class InformationLoss {
 
   /**
    * Compute euclidean distance (l2 norm).

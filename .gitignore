@@ -1,6 +1,10 @@
 bin/
 project/
 target/
+results/
+runScripts/
 .settings/
 .cache-main
 .classpath
+.gitignore
+
