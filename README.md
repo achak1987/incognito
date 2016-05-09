@@ -44,12 +44,17 @@
  
  		In the above example set there are 5 Levels. The content of the file would be
  ```
- 			3:0-4
- 			2:0-4
- 			0-4:0-9
- 			0-9:0-49
- 			0-49:0-99
- 			0-99:Salary
+ 			3,0-4
+ 			2,0-4
+ 			...
+ 			0-4,0-9
+ 			...
+ 			0-9,0-49
+ 			...
+ 			0-49,0-99
+ 			...
+ 			0-99,Salary
+ 			...
  			Salary,*
  			*,*
  			...
