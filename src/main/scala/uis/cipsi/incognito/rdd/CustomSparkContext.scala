@@ -56,7 +56,7 @@ object CustomSparkContext {
     val sparkConf = new SparkConf()
     sparkConf.setAppName("Incognito")
 
-        sparkConf.setMaster(sparkMaster)
+//        sparkConf.setMaster(sparkMaster)
 //        sparkConf.set("spark.cores.max", "80")
 //        sparkConf.set("spark.executor.memory", "25g")
         
