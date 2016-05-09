@@ -75,6 +75,7 @@ Incognito-1.0.jar \
  ```
  
 [Arguments: 
+```
 	- -1: used to set spark master when run from eclipse on local. Uncomment line 59 (sparkConf.setMaster(sparkMaster)) in uis.cipsi.incognito.rdd.CustomSparkContext if local is used instead from eclipse
 	- inPath: can be file or hdfs
 	- outPath: can be file or hdfs
@@ -82,7 +83,7 @@ Incognito-1.0.jar \
 	- outSize: keep as 1
 	- column seperator
 	- primaryIdentifierIndex,sensitiveAttributeIndex]
-	
+```	
 Once the Object file is created, we can run any of the anonymization methods as follows
  ```
 	spark-1.6.0/bin/spark-submit \
@@ -96,6 +97,7 @@ Incognito-1.0.jar \
 *For Incognito: IncognitoMain, Beta-Likeness: BetaMain, T-Closeness: TCloseMain
 
 [Arguments: 
+```
 	- -1: used to set spark master when run from eclipse on local. Uncomment line 59 (sparkConf.setMaster(sparkMaster)) in uis.cipsi.incognito.rdd.CustomSparkContext if local is used instead from eclipse
 	- path: path where the data file is located (just the path without filename. can be file or hdfs)
 	- outPath: can be file or hdfs
@@ -103,7 +105,9 @@ Incognito-1.0.jar \
 	- originalFilename: Since the structure and taxonomy files are named as originalfilename.taxonomy and original filename.structure. Since, the path is already specified as an earlier argument, only the file name is required
 	- primaryIdentifierIndex,sensitiveAttributeIndex
 	- a threshold value. Depends on the algorithm and data type. for incognito and beta it should be greater than 0. For proper results, it should be greater than atleast 1. For Tcloseness the value has to between 0 and 1. Alter the threshold to get a optimal number of Equvalance classes. Ensure that you have atleast more than 1 equivalance class
-	- numPartitions: usually 2 or 3 * total number of cores on your spark cluster]
+	- numPartitions: usually 2 or 3 * total number of cores on your spark cluster
+	```
+	]
  	
  	
 #TO Run (Mondrian)
@@ -118,11 +122,14 @@ Incognito-1.0.jar \
  ```
  
  [Arguments: 
+ ```
 	- -1: used to set spark master when run from eclipse on local. Uncomment line 59 (sparkConf.setMaster(sparkMaster)) in uis.cipsi.incognito.rdd.CustomSparkContext if local is used instead from eclipse
 	- path: path where the data file is located (can be file or hdfs)
 	- outPath: can be file or hdfs
 	- primaryIdentifierIndex,sensitiveAttributeIndex
 	- K min sizes of anonymized groups
 	- numPartitions: usually 2 or 3 * total number of cores on your spark cluster
-	- column seperator]
+	- column seperator
+	```
+	]
 
