@@ -1,0 +1,11 @@
+flu,lungs
+bronchitis,lungs
+lungs,disease
+gastric,stomach
+stomach cancer,stomach
+stomach,disease
+hiv,std
+herpes,std
+std,disease
+disease,*
+*,*

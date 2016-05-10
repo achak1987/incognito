@@ -6,7 +6,10 @@ import org.apache.spark.SparkContext._
 import org.apache.spark.mllib.stat.{ MultivariateStatisticalSummary, Statistics }
 import org.apache.spark.mllib.linalg.Vectors
 
-class Mondrian(data: RDD[org.apache.spark.mllib.linalg.Vector], K: Int, pid: Int, sid: Int) extends Serializable {
+class Mondrian(_data: RDD[Array[String]], K: Int, pid: Int, sid: Int) extends Serializable {
+  val data = _data.map(_.filter({ var i = (-1); v => i += 1; i != sid })).map(v => Vectors.dense(v.map(_.toDouble)))
+
+  //pid, ECid
   var anonymizedPID = data.sparkContext.parallelize(Array((Double.MaxValue, Int.MinValue)))
 
   def getNormalizedData(): RDD[org.apache.spark.mllib.linalg.Vector] = {
@@ -32,8 +35,8 @@ class Mondrian(data: RDD[org.apache.spark.mllib.linalg.Vector], K: Int, pid: Int
       var maxRange = Double.MinValue
       v =>
         i += 1
-        //We ignore the primary and SA indexes
-        if (i != pid && i != sid) {
+        //We ignore the primary indexes
+        if (i != pid) {
           val range = v - min(i)
           if (range > maxRange) {
             maxRange = range
@@ -43,43 +46,37 @@ class Mondrian(data: RDD[org.apache.spark.mllib.linalg.Vector], K: Int, pid: Int
     })
 
     val partitions = dataNormalized.map(v => (v(partitionIndex), v)).sortBy(_._1).zipWithIndex.map(v => (v._2, v._1._2))
-    val medianIndex = partitions.count / 2
-    val lhs = partitions.filter(_._1 < medianIndex)
-    val rhs = partitions.filter(_._1 >= medianIndex)
-
-    val lhsCount = lhs.count
-    val rhsCount = rhs.count
-
-    if (lhsCount <= K) {
-      anonymizedPID = anonymizedPID.union(lhs.map(v => (v._2(pid), lhs.hashCode)))
-    } else {
+    val n = partitions.count
+    val medianIndex = n / 2
+    
+    if (n > 2 * K + 1 ) {
+      val lhs = partitions.filter(_._1 < medianIndex)
+      val rhs = partitions.filter(_._1 >= medianIndex)
       partitionData(lhs.map(_._2))
+      partitionData(rhs.map(_._2))
+    } else {
+      anonymizedPID = anonymizedPID.union(partitions.map(v => (v._2(pid), partitions.hashCode)))
     }
 
-    if (rhsCount <= K) {
-      anonymizedPID = anonymizedPID.union(rhs.map(v => (v._2(pid), rhs.hashCode)))
-    } else {
-      partitionData(rhs.map(_._2))
-    }
   }
   def getAnonymizedData(numPartitions: Int): RDD[String] = {
-    val ec = data
-      .map(v => (v(pid), v)).join(anonymizedPID.filter(_._1 != Double.MinValue))
+    val ec = _data
+      .map(v => (v(pid).toDouble, v)).join(anonymizedPID.filter(_._1 != Double.MinValue))
       .map(v => (v._2._2, v._2._1))
       .groupByKey(numPartitions)
       .mapValues { x =>
         val size = x.size
-        val data =  x.toArray
-        .map(v =>  breeze.linalg.DenseVector(v.toArray))
-        .reduce(_+_) 
+        val data = x.toArray.map(_.filter({ var i = (-1); v => i += 1; i != pid && i != sid }).map(_.toDouble))
+          .map(v => breeze.linalg.DenseVector(v.toArray))
+          .reduce(_ + _)
         val mean = Vectors.dense(data.map(_ / size).toArray)
-        x.map({v => 
-          val meanWithOutIDs = mean.toArray.filter({var i=(-1); f => i+=1; i != pid || i != sid})
-          (v(pid) +: meanWithOutIDs :+ v(sid)).mkString(",")            
-        })        
+        x.map({ v =>
+          val meanWithOutIDs = mean.toArray
+          (v(pid) +: meanWithOutIDs :+ v(sid)).mkString(",")
+        })
       }
-    .map(_._2)
-    .flatMap(v => v)
+      .map(v => v._2.map(s => v._1 + "," + s))
+      .flatMap(v => v)
     ec
   }
 

@@ -23,7 +23,7 @@ object MondrianMain {
 
     val sc = CustomSparkContext.create(sparkMaster, numPartitions)
     val _data = sc.textFile(filePath)
-    val data = _data.map(r => Vectors.dense(r.split(dataStrSplitChar).map(v => v.toDouble))).cache
+    val data = _data.map(r => r.split(dataStrSplitChar)).cache
 
     val startTime = System.nanoTime();
 
