@@ -1,17 +1,23 @@
 # Spark Anonymization Toolkit
- #######################WORK IN PROGRESS###################
- Data with only numeric values for Quasi Identifiers are processed.
- Sensitive Attributes are String type. They much contain a user defined taxonomy tree. Explained bellow.
+*WORK IN PROGRESS*
+
+Data with only numeric values for Quasi Identifiers are processed.
+
+Sensitive Attributes are String type. They must contain a user defined taxonomy tree. Explained bellow.
   
  Currently the following algorithms are implemented. 
- 	t-closeness
- 	beta-likeness
- 	incognito (our solution)
- 	Mondrian
+ 
+ 	* t-closeness
+ 	* beta-likeness
+ 	* incognito (our solution)
+ 	* Mondrian
+ 		*TODO: Partitioning for the Equivalence Class creation process
 
-#Included example data set.
-	ISLR.WAGE (with selected features)
-	islr.dat - comma seperated dataset (PI: primary identifier, QI: quasi identifier, SA: sensitive attribute)
+
+#Included example data set
+
+	* ISLR.WAGE (with selected features): https://cran.r-project.org/web/packages/ISLR/ISLR.pdf
+	* islr.dat - comma seperated dataset (PI: primary identifier, QI: quasi identifier, SA: sensitive attribute)
 		- PI id: Unique Number value for each record (custom inserted)
 		- QI year: numeric
 		- QI age: numeric
@@ -24,14 +30,19 @@
 		- SA wage: Workers raw wage (represented as string with a taxonomy tree)
 		
 		- total records 3000 records
-		
-	islr.dat.structure - describes the structure of the dataset. Has to be user defined.  Each entry represents a column. The filename should prefix with the filename of the dataset file that is describes
-		index,isTypeNumeric=(0 False, 1 True),noOfLevels(0 numeric, n levels in the taxonomy tree of the string attribute)
-		
-	islr.dat.taxonomy - describes the taxonomy tree for the string columns. Has to be user defined. For this dataset includes the Sensitive Attribute taxonomy. The filename should prefix with the filename of the dataset file that is describes
-		child,parent		
-		Example:					
- ```
+	* islr.dat.structure - describes the structure of the dataset. 
+		- Has to be user defined.
+		- Each entry represents a column. 
+		- The **filename** should **prefix** with the filename of the dataset file that is describes
+		- Syntex: index,isTypeNumeric=(0 False, 1 True),noOfLevels(0 numeric, n levels in the taxonomy tree of the string attribute)
+	* islr.dat.taxonomy - describes the taxonomy tree for the string columns. 
+		- Has to be user defined. 
+		- This dataset includes the Sensitive Attribute taxonomy. 
+		- The filename should prefix with the filename of the dataset file that is describes child,parent
+	
+	
+	Example:					
+```
 													Salary
 					
 					   0-99							       100-199 				...							
@@ -40,96 +51,110 @@
 	
 	0-9   ... 	40-49	 		50-59 ... 90-99		...
   0-4   5-9  40-44   45-49  ...
- 3   2   8     43   45 48 49
-  ```
+3    2   8    43    45 48 49 ...
+ ```
  
- 		In the above example set there are 5 Levels. The content of the file would be
+ 	In the above example set there are 5 Levels. The content of the file would be
  ```
- 			3,0-4
- 			2,0-4
- 			...
- 			0-4,0-9
- 			...
- 			0-9,0-49
- 			...
- 			0-49,0-99
- 			...
- 			0-99,Salary
- 			...
- 			Salary,*
- 			*,*
- 			...
+ 3,0-4
+ 2,0-4
+ ...
+ 0-4,0-9
+ ...
+ 0-9,0-49
+ ...
+ 0-49,0-99
+ ...
+ 0-99,Salary
+ ...
+ Salary,*
+ *,*
+ ...
  ``` 			
-		
-		
-#TO Run (incognito, tcloseness and beta likeness)
-Currently the data needs to be converted to a Object format. We run the DataGen Object
+ 
+ 
+#TO Run
 
- ```
+**incognito, tcloseness and beta likeness**
+
+Determine the optimal threshold and the number of buckets and equivalence classes that cab be created for a given dataset. Choose an threshold that creates a balanced number of buckets and equivalence classes-
+
+*The output is listed as follows:*
+
+threshold, bucketCount, equivalenceClassCount, bucketizationTime, dichotomizationTime
+```
 spark-1.6.0/bin/spark-submit \
 --master spark://spark.master:port \
 --executor-memory memory \
---class uis.cipsi.incognito.utils.DataGen \
+--class incognito.utils.BucketECThesholdList \
 Incognito-1.0.jar \
--1 /home/.../islr/islr.dat /home/.../islr/o 1 1 columnSeperator primaryIdentifierIndex,SensitiveAttributeIndex
- ```
- 
-[Arguments: 
+-1 InputFolderPath  dataset.filename columnSeperator primaryIdentifierIndex,SensitiveAttributeIndex \
+startTreshold stopThreshold incrementBy algorithmName numPartitions
 ```
-	- -1: used to set spark master when run from eclipse on local. Uncomment line 59 (sparkConf.setMaster(sparkMaster)) in uis.cipsi.incognito.rdd.CustomSparkContext if local is used instead from eclipse
-	- inPath: can be file or hdfs
-	- outPath: can be file or hdfs
-	- inSize: keep as 1
-	- outSize: keep as 1
-	- column seperator
-	- primaryIdentifierIndex,sensitiveAttributeIndex]
+ 
+```
+[Arguments: 
+	- -1: used to set spark master. Only required, when running from IDE
+	- InputFolderPath: can be file or hdfs. Path where the data set to be anonymized, its structure and taxonomy is located
+	- dataset.filename: filename of the dataset to be anonymized
+	- columnSeperator: a seperator string that seperates column values in the the input file
+	- primaryIdentifierIndex,SensitiveAttributeIndex: the index of the primary and the sensitive attribute (starts with **zero**)
+	- startTreshold: start with 0. Specifies the starting threshold
+	- stopThreshold: for *tcloseness*, specify the maximum value as 1. For *beta-likeness, incognito* it can be any number. Recommanded to use *3*, *5*, or *10*.
+	- incrementBy: determines, by how much each itteration should increment the threshold. Recommanded to use *0.1*
+	- algorithmName: Specifies the algorithm to run. Use any one of the values: *incognito* or *beta* or *tclose*
+	- numPartitions: usually 2 or 3 * total number of cores on your spark cluster]
 ```	
-Once the Object file is created, we can run any of the anonymization methods as follows
- ```
-	spark-1.6.0/bin/spark-submit \
---master spark://spark.master:port  \
---executor-memory memory \
---class uis.cipsi.incognito.examples.Algorithm \
-Incognito-1.0.jar \
--1 /home/.../islr/ /home/.../islr/anonymized/FileOutName o/*/ islr.dat primaryIdentifierIndex,SensitiveAttributeIndex threshold numPartitions
- ```
- 
-*For Incognito: IncognitoMain, Beta-Likeness: BetaMain, T-Closeness: TCloseMain
 
-[Arguments: 
+Once a optimal threshold for is determined for the algorithm, run the following to anonymize the dataset
+local
+/home/antorweep/git/SparkAnonymizationToolkit/data/disease/
+disease.dat
+,
+0,5
+2.0
+8
+/home/antorweep/git/SparkAnonymizationToolkit/data/disease/out
+incognito
 ```
-	- -1: used to set spark master when run from eclipse on local. Uncomment line 59 (sparkConf.setMaster(sparkMaster)) in uis.cipsi.incognito.rdd.CustomSparkContext if local is used instead from eclipse
-	- path: path where the data file is located (just the path without filename. can be file or hdfs)
-	- outPath: can be file or hdfs
-	- filename: filename of the dataset to be anonymized. Since we already created a object file we give the folder ex.: o/*/
-	- originalFilename: Since the structure and taxonomy files are named as originalfilename.taxonomy and original filename.structure. Since, the path is already specified as an earlier argument, only the file name is required
-	- primaryIdentifierIndex,sensitiveAttributeIndex
-	- a threshold value. Depends on the algorithm and data type. for incognito and beta it should be greater than 0. For proper results, it should be greater than atleast 1. For Tcloseness the value has to between 0 and 1. Alter the threshold to get a optimal number of Equvalance classes. Ensure that you have atleast more than 1 equivalance class
+spark-1.6.0/bin/spark-submit \
+--master spark://spark.master:port \
+--executor-memory memory \
+--class incognito.examples.PhaseBasedAnonymization \
+Incognito-1.0.jar \
+-1 InputFolderPath  dataset.filename columnSeperator primaryIdentifierIndex,SensitiveAttributeIndex \
+treshold numPartitions outputPath algorithmName
+```
+```
+[Arguments: 
+	- -1: used to set spark master. Only required, when running from IDE
+	- InputFolderPath: can be file or hdfs. Path where the data set to be anonymized, its structure and taxonomy is located
+	- dataset.filename: filename of the dataset to be anonymized
+	- columnSeperator: a seperator string that seperates column values in the the input file
+	- primaryIdentifierIndex,SensitiveAttributeIndex: the index of the primary and the sensitive attribute (starts with **zero**)
+	- treshold: the optimal treshold to run the algorithm with
 	- numPartitions: usually 2 or 3 * total number of cores on your spark cluster
+	- outputPath: the output path where the anonymized data set is to be saved
+	- algorithmName: Specifies the algorithm to run. Use any one of the values: *incognito* or *beta* or *tclose*]
 	```
-	]
  	
  	
-#TO Run (Mondrian)
-Mondrian is simple k-anonymization technique.
+*Mondrian* a is simple k-anonymization technique.
  ```
-	spark-1.6.0/bin/spark-submit \
+ spark-1.6.0/bin/spark-submit \
 --master spark://spark.master:port  \
 --executor-memory memory \
---class uis.cipsi.incognito.examples.MondrianMain \
+--class incognito.examples.MondrianMain \
 Incognito-1.0.jar \
--1 /home/.../islr/file /home/.../islr/anonymized/FileOutName primaryIdentifierIndex,SensitiveAttributeIndex K numPartitions columnSeperator
+-1 InputFolderPath/dataset.filename primaryIdentifierIndex,SensitiveAttributeIndex K numPartitions columnSeperator
  ```
  
- [Arguments: 
  ```
-	- -1: used to set spark master when run from eclipse on local. Uncomment line 59 (sparkConf.setMaster(sparkMaster)) in uis.cipsi.incognito.rdd.CustomSparkContext if local is used instead from eclipse
-	- path: path where the data file is located (can be file or hdfs)
-	- outPath: can be file or hdfs
-	- primaryIdentifierIndex,sensitiveAttributeIndex
-	- K min sizes of anonymized groups
+[Arguments: 
+	- -1: used to set spark master. Only required, when running from IDE
+	- InputFolderPath/dataset.filename: can be file or hdfs. Path where the data set to be anonymized, its structure and taxonomy is located/filename of the dataset to be anonymized
+	- primaryIdentifierIndex,SensitiveAttributeIndex: the index of the primary and the sensitive attribute (starts with **zero**)
+	- K: min sizes of anonymized groups
 	- numPartitions: usually 2 or 3 * total number of cores on your spark cluster
-	- column seperator
+	- columnSeperator: a seperator string that seperates column values in the the input file]
 	```
-	]
-
