@@ -1,2 +1,0 @@
-echo "RUN JOBS"
-IncognitoJobs.sh >> results
