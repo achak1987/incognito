@@ -147,7 +147,7 @@ treshold numPartitions outputPath algorithmName
 - algorithmName: Specifies the algorithm to run. Use any one of the values: *incognito* or *beta* or *tclose*]
 ```
  	
-*Mondrian* a is simple k-anonymization technique.
+**Mondrian** a is simple k-anonymization technique.
  ```
  spark-1.6.0/bin/spark-submit \
 --master spark://spark.master:port  \
