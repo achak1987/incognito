@@ -9,3 +9,5 @@ libraryDependencies += "org.apache.spark" % "spark-core_2.10" % "1.6.0" withSour
 libraryDependencies += "org.apache.spark" % "spark-mllib_2.10" % "1.6.0" withSources() withJavadoc()
 
 libraryDependencies += "org.scala-lang.modules" % "scala-async_2.10" % "0.9.5" withSources() withJavadoc()
+
+libraryDependencies += "com.quantifind" % "wisp_2.11" % "0.0.4" withSources() withJavadoc()

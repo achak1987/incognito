@@ -1,3 +1,6 @@
+require(plotrix)
+source("/home/antorweep/git/SparkAnonymizationToolkit/R/barp2.R")
+
 i.b.0.7.t.0.8<-rbind(c(23.37623,23.12436,23.22573,23.47555,18.84456),
 c(32.61873,30.26931,28.82740,32.61232,30.09025),
 c(29.62312,30.26931,29.23985,26.90695,30.15420),
@@ -57,25 +60,26 @@ colnames(i.b.7.1.t.0.81)<-c("ln.reg.","dec.tr","knn.reg.","nnet","rnd.frst")
 
 par(mfrow = c(4, 2), mar=c(6,4,1,2))
 barplot(i.b.0.7.t.0.8, sub="(a) with i=0.7(#ecs=14), b=0.7(#ecs=19), t=0.8(#ecs=3)", 
-        beside=TRUE, col=c("black","red", "green", "blue"))
+        beside=TRUE, col=c("black","red", "green", "blue"), angle=c(0, 45, 90, 135), density=c(65,55,45, 35))
 barplot(i.b.0.7.t.0.81, sub="(b) with i=0.7(#ecs=14), b=0.7(#ecs=19), t=0.81(#ecs=21)",
-        beside=TRUE, col=c("black","red", "green", "blue"))
+        beside=TRUE, col=c("black","red", "green", "blue"), angle=c(0, 45, 90, 135), density=c(65,55,45, 35))
 barplot(i.b.t.0.8, sub="(c) with i=0.8(#ecs=19), b=0.8(#ecs=9), t=0.8(#ecs=3)", 
-        beside=TRUE, col=c("black","red", "green", "blue"))
+        beside=TRUE, col=c("black","red", "green", "blue"), angle=c(0, 45, 90, 135), density=c(65,55,45, 35))
 barplot(i.b.0.8.t.0.81, sub="(d) with i=0.8(#ecs=19), b=0.8(#ecs=9), t=0.81(#ecs=21)",
-        beside=TRUE, col=c("black","red", "green", "blue"))
+        beside=TRUE, col=c("black","red", "green", "blue"), angle=c(0, 45, 90, 135), density=c(65,55,45, 35))
 barplot(i.b.0.9.t.0.8, sub="(e) with i=0.9(#ecs=21), b=0.9(#ecs=3), t=0.8(#ecs=3)",
-        beside=TRUE, col=c("black","red", "green", "blue"))
+        beside=TRUE, col=c("black","red", "green", "blue"), angle=c(0, 45, 90, 135), density=c(65,55,45, 35))
 barplot(i.b.0.9.t.0.81, sub="(f) with i=0.9(#ecs=21), b=0.9(#ecs=3), t=0.81(#ecs=21)",
-        beside=TRUE, col=c("black","red", "green", "blue"))
+        beside=TRUE, col=c("black","red", "green", "blue"), angle=c(0, 45, 90, 135), density=c(65,55,45, 35))
 barplot(i.b.7.1.t.0.8, sub="(g) with i=7.1(#ecs=7), b=7.1(#ecs=7), t=0.8(#ecs=3)",
-        beside=TRUE, col=c("black","red", "green", "blue"))
+        beside=TRUE, col=c("black","red", "green", "blue"), angle=c(0, 45, 90, 135), density=c(65,55,45, 35))
 barplot(i.b.7.1.t.0.81, sub="(h) with i=7.1(#ecs=7), b=7.1(#ecs=7), t=0.81(#ecs=21)",
-        beside=TRUE, col=c("black","red", "green", "blue"))
+        beside=TRUE, col=c("black","red", "green", "blue"), angle=c(0, 45, 90, 135), density=c(65,55,45, 35))
 reset <- function() {
   par(mfrow=c(1, 1), oma=rep(0, 4), mar=rep(0, 4), new=TRUE)
   plot(0:1, 0:1, type="n", xlab="", ylab="", axes=FALSE)
 }
 
 reset()
-legend("top", legend=c("original", "incognito", "beta", "tclose"), fill=c("black", "red", "green", "blue"), cex=0.75, ncol=3, bty="n")
+legend("top", legend=c("original", "incognito", "beta", "tclose"), fill=c("black", "red", "green", "blue"), cex=0.75, ncol=3, bty="n", 
+       angle=c(0, 45, 90, 135), density=c(65,55,45, 35))

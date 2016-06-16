@@ -13,13 +13,14 @@ colnames(i.0.9.t.0.81)<-c("ln.reg.","dec.tr","knn.reg.","nnet","rnd.frst")
 
 par(mfrow = c(1, 2), mar=c(6,4,1,2))
 barplot(i.0.8.b.0.7, sub="(a) with i=0.8(#ecs=19), b=0.7(#ecs=19)", 
-        beside=TRUE, col=c("black","red", "green"), cex.names=0.75)
+        beside=TRUE, col=c("black","red", "green"), cex.names=0.75, angle=c(0, 45, 90), density=c(65,55,45))
 barplot(i.0.9.t.0.81, sub="(b) with i=0.9(#ecs=21), t=0.81(#ecs=21)",
-        beside=TRUE, col=c("black","red", "blue"), cex.names=0.75)
+        beside=TRUE, col=c("black","red", "blue"), cex.names=0.75, angle=c(0, 45, 135), density=c(65,55,35))
 reset <- function() {
   par(mfrow=c(1, 1), oma=rep(0, 4), mar=rep(0, 4), new=TRUE)
   plot(0:1, 0:1, type="n", xlab="", ylab="", axes=FALSE)
 }
 
 reset()
-legend("top", legend=c("original", "incognito", "beta", "tclose"), fill=c("black", "red", "green", "blue"), cex=0.75, ncol=3, bty="n")
+legend("top", legend=c("original", "incognito", "beta", "tclose"), fill=c("black", "red", "green", "blue"), cex=1, ncol=3, bty="n", 
+       angle=c(0, 45, 90, 135), density=c(65,55,45, 35))

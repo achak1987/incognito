@@ -1,11 +1,14 @@
 flu,lungs
 bronchitis,lungs
+lungs cancer,lungs
 lungs,disease
 gastric,stomach
 stomach cancer,stomach
+stomach ulcer,stomach
 stomach,disease
 hiv,std
 herpes,std
+syphilis,std
 std,disease
 disease,*
 *,*
