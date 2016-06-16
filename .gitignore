@@ -3,9 +3,16 @@ project/
 target/
 results/
 runScripts/
-src/main/scala/incognito/archive
+R/
+data/disease
+lib/
+runScripts/
+src/main/scala/incognito/archive/
 .settings/
 .cache-main
 .classpath
 .gitignore
+.Rhistory
+.gitignore
+.project
 

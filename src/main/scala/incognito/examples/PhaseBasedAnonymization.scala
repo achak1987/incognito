@@ -154,11 +154,11 @@ object PhaseBasedAnonymization {
     println("recording time= " + (System.nanoTime() - totalAnonymizationTime).toDouble / 1000000000 + " seconds")
 
     //    ecs.saveAsObjectFile(outFilePath)
-//    if (outFilePath != "")
-//      anonymizedData.saveAsTextFile(outFilePath)
+    if (outFilePath != "")
+      anonymizedData.saveAsTextFile(outFilePath)
 
     //    ecs.collect.foreach(println)
-        anonymizedData.collect.foreach(println)
+//        anonymizedData.collect.foreach(println)
     val totalEstimatedTime = System.nanoTime() - startTime;
     println("total time= " + (totalEstimatedTime).toDouble / 1000000000 + " seconds")
 
