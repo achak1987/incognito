@@ -166,3 +166,5 @@ Incognito-1.0.jar \
 - numPartitions: usually 2 or 3 * total number of cores on your spark cluster
 - columnSeperator: a seperator string that seperates column values in the the input file]
 ```
+
+**Developed on apache spark 1.6.0**
