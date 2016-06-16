@@ -103,16 +103,16 @@ startTreshold stopThreshold incrementBy algorithmName numPartitions
  
 ```
 [Arguments: 
-	- -1: used to set spark master. Only required, when running from IDE
-	- InputFolderPath: can be file or hdfs. Path where the data set to be anonymized, its structure and taxonomy is located
-	- dataset.filename: filename of the dataset to be anonymized
-	- columnSeperator: a seperator string that seperates column values in the the input file
-	- primaryIdentifierIndex,SensitiveAttributeIndex: the index of the primary and the sensitive attribute (starts with **zero**)
-	- startTreshold: start with 0. Specifies the starting threshold
-	- stopThreshold: for *tcloseness*, specify the maximum value as 1. For *beta-likeness, incognito* it can be any number. Recommanded to use *3*, *5*, or *10*.
-	- incrementBy: determines, by how much each itteration should increment the threshold. Recommanded to use *0.1*
-	- algorithmName: Specifies the algorithm to run. Use any one of the values: *incognito* or *beta* or *tclose*
-	- numPartitions: usually 2 or 3 * total number of cores on your spark cluster]
+- -1: used to set spark master. Only required, when running from IDE
+- InputFolderPath: can be file or hdfs. Path where the data set to be anonymized, its structure and taxonomy is located
+- dataset.filename: filename of the dataset to be anonymized
+- columnSeperator: a seperator string that seperates column values in the the input file
+- primaryIdentifierIndex,SensitiveAttributeIndex: the index of the primary and the sensitive attribute (starts with **zero**)
+- startTreshold: start with 0. Specifies the starting threshold
+- stopThreshold: for *tcloseness*, specify the maximum value as 1. For *beta-likeness, incognito* it can be any number. Recommanded to use *3*, *5*, or *10*.
+- incrementBy: determines, by how much each itteration should increment the threshold. Recommanded to use *0.1*
+- algorithmName: Specifies the algorithm to run. Use any one of the values: *incognito* or *beta* or *tclose*
+- numPartitions: usually 2 or 3 * total number of cores on your spark cluster]
 ```	
 
 Once a optimal threshold for is determined for the algorithm, run the following to anonymize the dataset
@@ -136,17 +136,16 @@ treshold numPartitions outputPath algorithmName
 ```
 ```
 [Arguments: 
-	- -1: used to set spark master. Only required, when running from IDE
-	- InputFolderPath: can be file or hdfs. Path where the data set to be anonymized, its structure and taxonomy is located
-	- dataset.filename: filename of the dataset to be anonymized
-	- columnSeperator: a seperator string that seperates column values in the the input file
-	- primaryIdentifierIndex,SensitiveAttributeIndex: the index of the primary and the sensitive attribute (starts with **zero**)
-	- treshold: the optimal treshold to run the algorithm with
-	- numPartitions: usually 2 or 3 * total number of cores on your spark cluster
-	- outputPath: the output path where the anonymized data set is to be saved
-	- algorithmName: Specifies the algorithm to run. Use any one of the values: *incognito* or *beta* or *tclose*]
-	```
- 	
+- -1: used to set spark master. Only required, when running from IDE
+- InputFolderPath: can be file or hdfs. Path where the data set to be anonymized, its structure and taxonomy is located
+- dataset.filename: filename of the dataset to be anonymized
+- columnSeperator: a seperator string that seperates column values in the the input file
+- primaryIdentifierIndex,SensitiveAttributeIndex: the index of the primary and the sensitive attribute (starts with **zero**)
+- treshold: the optimal treshold to run the algorithm with
+- numPartitions: usually 2 or 3 * total number of cores on your spark cluster
+- outputPath: the output path where the anonymized data set is to be saved
+- algorithmName: Specifies the algorithm to run. Use any one of the values: *incognito* or *beta* or *tclose*]
+```
  	
 *Mondrian* a is simple k-anonymization technique.
  ```
@@ -160,10 +159,10 @@ Incognito-1.0.jar \
  
  ```
 [Arguments: 
-	- -1: used to set spark master. Only required, when running from IDE
-	- InputFolderPath/dataset.filename: can be file or hdfs. Path where the data set to be anonymized, its structure and taxonomy is located/filename of the dataset to be anonymized
-	- primaryIdentifierIndex,SensitiveAttributeIndex: the index of the primary and the sensitive attribute (starts with **zero**)
-	- K: min sizes of anonymized groups
-	- numPartitions: usually 2 or 3 * total number of cores on your spark cluster
-	- columnSeperator: a seperator string that seperates column values in the the input file]
-	```
+- -1: used to set spark master. Only required, when running from IDE
+- InputFolderPath/dataset.filename: can be file or hdfs. Path where the data set to be anonymized, its structure and taxonomy is located/filename of the dataset to be anonymized
+- primaryIdentifierIndex,SensitiveAttributeIndex: the index of the primary and the sensitive attribute (starts with **zero**)
+- K: min sizes of anonymized groups
+- numPartitions: usually 2 or 3 * total number of cores on your spark cluster
+- columnSeperator: a seperator string that seperates column values in the the input file]
+```
