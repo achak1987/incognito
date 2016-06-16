@@ -11,8 +11,8 @@ src/main/scala/incognito/archive/
 .settings/
 .cache-main
 .classpath
-.gitignore
-.Rhistory
-.gitignore
-.project
+.gitignore/
+.Rhistory/
+.gitignore/
+.project/
 
