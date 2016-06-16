@@ -1,4 +1,4 @@
-# Spark Anonymization Toolkit
+# Incognito - a large scale anonymization framework
 *WORK IN PROGRESS*
 
 Primary Attribute can be either numeric or String
