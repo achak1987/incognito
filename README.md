@@ -116,15 +116,6 @@ startTreshold stopThreshold incrementBy algorithmName numPartitions
 ```	
 
 Once a optimal threshold for is determined for the algorithm, run the following to anonymize the dataset
-local
-/home/antorweep/git/SparkAnonymizationToolkit/data/disease/
-disease.dat
-,
-0,5
-2.0
-8
-/home/antorweep/git/SparkAnonymizationToolkit/data/disease/out
-incognito
 ```
 spark-1.6.0/bin/spark-submit \
 --master spark://spark.master:port \
