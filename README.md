@@ -167,4 +167,4 @@ Incognito-1.0.jar \
 - columnSeperator: a seperator string that seperates column values in the the input file]
 ```
 
-**Developed on apache spark 1.6.0**
+**Developed for apache spark 1.6.0 and onwards**
