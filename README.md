@@ -19,7 +19,8 @@ Sensitive Attributes are String type. They must contain a user defined taxonomy 
  	* [beta-likeness](http://dl.acm.org/citation.cfm?id=2350255)
  	* [incognito] (under review)
  	* [Mondrian](http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=1617393&url=http%3A%2F%2Fieeexplore.ieee.org%2Fxpls%2Fabs_all.jsp%3Farnumber%3D1617393)
- 		*TODO: Partitioning for the Equivalence Class creation process
+ 		
+* TODO: Partitioning for the Equivalence Class creation process
 
 
 #Included example data set
