@@ -1,16 +1,24 @@
 # Spark Anonymization Toolkit
 *WORK IN PROGRESS*
 
-Data with only numeric values for Quasi Identifiers are processed.
+Primary Attribute can be either numeric or String
+	
+* TODO: Multiple Primary Attributes
+
+Data with only Numeric Values for Quasi Identifiers are processed.
+	
+* TODO: Quasi Identifiers of String Type
 
 Sensitive Attributes are String type. They must contain a user defined taxonomy tree. Explained bellow.
+	
+* TODO: Multiple Sensitive Stributes
   
  Currently the following algorithms are implemented. 
  
- 	* t-closeness
- 	* beta-likeness
- 	* incognito (our solution)
- 	* Mondrian
+ 	* [t-closeness](http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=4221659&url=http%3A%2F%2Fieeexplore.ieee.org%2Fxpls%2Fabs_all.jsp%3Farnumber%3D4221659)
+ 	* [beta-likeness](http://dl.acm.org/citation.cfm?id=2350255)
+ 	* [incognito] (under review)
+ 	* [Mondrian](http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=1617393&url=http%3A%2F%2Fieeexplore.ieee.org%2Fxpls%2Fabs_all.jsp%3Farnumber%3D1617393)
  		*TODO: Partitioning for the Equivalence Class creation process
 
 
